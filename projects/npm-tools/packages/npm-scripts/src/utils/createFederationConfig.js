@@ -213,6 +213,10 @@ module.exports = async function () {
 					test: /\.scss$/,
 					use: ['style-loader', 'css-loader', 'sass-loader'],
 				},
+				{
+					test: /\.(css|svg)/,
+					type: 'asset/source',
+				},
 			],
 		},
 		output: {
