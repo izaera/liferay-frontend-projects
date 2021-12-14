@@ -12,10 +12,10 @@ import project from 'liferay-npm-build-tools-common/lib/project';
 import path from 'path';
 import sass from 'sass';
 
-import abort from './util/abort';
-import findFiles from './util/findFiles';
-import sassImporter from './util/sassImporter';
-import spawn from './util/spawn';
+import abort from '../util/abort';
+import findFiles from '../util/findFiles';
+import sassImporter from '../util/sassImporter';
+import spawn from '../util/spawn';
 
 const {info, print, success} = format;
 

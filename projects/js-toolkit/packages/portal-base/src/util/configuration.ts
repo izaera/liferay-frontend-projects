@@ -8,10 +8,13 @@ import project from 'liferay-npm-build-tools-common/lib/project';
 import os from 'os';
 import path from 'path';
 
-export type Command = 'deploy';
+export type Command = 'build' | 'deploy';
 export type ConfigurationValue = boolean | number | object | string;
 
 export interface Configuration {
+	build?: {
+		type?: 'ufesm';
+	};
 	deploy?: {
 		liferayDir?: string;
 	};
