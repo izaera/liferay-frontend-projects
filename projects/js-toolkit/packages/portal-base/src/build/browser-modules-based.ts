@@ -16,8 +16,13 @@ import abort from '../util/abort';
 import findFiles from '../util/findFiles';
 import sassImporter from '../util/sassImporter';
 import spawn from '../util/spawn';
+import generateCjsEjsBridge from './generateCjsEsmBridge';
 
 const {info, print, success, text, warn} = format;
+
+interface ImportmapJson {
+	[bareIdentifier: string]: string;
+}
 
 const prjDir = new FilePath(project.dir.asNative);
 const buildDir = new FilePath(project.buildDir.asNative);
@@ -43,6 +48,7 @@ support related to this type of build.
 
 	checkConfiguration();
 
+	await processImportmapJson();
 	copyDependencies();
 	copyAssets();
 	runSass();
@@ -128,6 +134,42 @@ function copyDependencies(): void {
 			abort(error);
 		}
 	});
+}
+
+async function processImportmapJson(): Promise<void> {
+	const importmap: ImportmapJson = JSON.parse(
+		fs.readFileSync(prjDir.join('importmap.json').asNative, 'utf8')
+	);
+
+	print(info`Processing import map...`);
+
+	let outImportMap: ImportmapJson = {};
+
+	for await (const [bareIdentifier, uri] of Object.entries(importmap)) {
+		if (uri.startsWith('cjs')) {
+			const cjsFile = prjDir.join(uri.replace(/^cjs:/, ''));
+			const esmFile = buildDir.join(
+				'_liferay_',
+				'cjs2esm',
+				`${bareIdentifier}.js`
+			);
+
+			await generateCjsEjsBridge(bareIdentifier, cjsFile, esmFile);
+
+			outImportMap[bareIdentifier] = `./${
+				buildDir.relative(esmFile).asPosix
+			}`;
+		}
+		else {
+			outImportMap[bareIdentifier] = uri;
+		}
+	}
+
+	fs.writeFileSync(
+		buildDir.join('importmap.json').asNative,
+		JSON.stringify(outImportMap, null, 2),
+		'utf8'
+	);
 }
 
 function runSass(): void {
