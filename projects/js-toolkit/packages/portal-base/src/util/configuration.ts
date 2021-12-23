@@ -33,8 +33,8 @@ function load(): Configuration {
 	let configuration: Configuration = {};
 
 	[
-		project.dir.join(CONFIGURATION_FILE).asNative,
 		path.join(os.homedir(), '.liferay.json'),
+		project.dir.join(CONFIGURATION_FILE).asNative,
 	].forEach((liferayJsonPath) => {
 		try {
 			configuration = {
