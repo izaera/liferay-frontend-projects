@@ -18,6 +18,8 @@ function runBabel(...args) {
 			'--no-babelrc',
 			'--config-file',
 			babelRcPath,
+			'--ignore',
+			'**/__liferay__/**',
 			...args,
 		]);
 	});

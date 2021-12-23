@@ -35,7 +35,9 @@ function createTempFile(filename, content, {autoDelete = true} = {}) {
 
 	const {dispose} = SignalHandler.onExit(() => {
 		if (autoDelete) {
-			fs.unlinkSync(tempFilePath);
+
+			//			fs.unlinkSync(tempFilePath);
+
 		}
 	});
 

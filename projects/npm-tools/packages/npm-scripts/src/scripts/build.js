@@ -10,6 +10,7 @@ let buildSass = require('../sass/build');
 let runTSC = require('../typescript/runTSC');
 const createTempFile = require('../utils/createTempFile');
 const getMergedConfig = require('../utils/getMergedConfig');
+const getPaths = require('../utils/getPaths');
 const instrument = require('../utils/instrument');
 let minify = require('../utils/minify');
 let runBabel = require('../utils/runBabel');
@@ -118,6 +119,21 @@ module.exports = async function (...args) {
 				'--extensions',
 				'.cjs,.es,.es6,.js,.jsx,.mjs,.ts,.tsx'
 			);
+
+			getPaths(
+				[`${BUILD_CONFIG.input}/__liferay__/**/*.js`],
+				['.js'],
+				null
+			).forEach((file) => {
+				file = file.substring(BUILD_CONFIG.input.length + 1);
+
+				const srcFile = path.join(BUILD_CONFIG.input, file);
+				const destFile = path.join(BUILD_CONFIG.output, file);
+
+				fs.mkdirSync(path.dirname(destFile), {recursive: true});
+
+				fs.writeFileSync(destFile, fs.readFileSync(srcFile));
+			});
 		}
 
 		if (fs.existsSync('webpack.config.js')) {

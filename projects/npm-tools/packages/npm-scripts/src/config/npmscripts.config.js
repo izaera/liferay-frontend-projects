@@ -49,7 +49,7 @@ module.exports = {
 					'inject-imports-dependencies',
 				],
 			},
-			'ignore': ['__generated__/**/*'],
+			'ignore': ['__generated__/**/*', '__liferay__/**/*'],
 			'output': 'build/node/packageRunBuild/resources',
 			'rules': [
 				{
