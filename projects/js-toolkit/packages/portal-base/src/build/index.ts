@@ -4,6 +4,7 @@
  */
 
 import customElementBased from './custom-element-based';
+import customElementWebpackBased from './custom-element-webpack-based';
 import bundlerBased from './bundler-based';
 import browserModulesBased from './browser-modules-based';
 import * as configuration from '../util/configuration';
@@ -14,6 +15,9 @@ export default async function build(): Promise<void> {
 	switch (buildType) {
 		case 'custom-element':
 			return customElementBased();
+
+		case 'custom-element-webpack':
+			return customElementWebpackBased();
 
 		case 'ufesm':
 			return browserModulesBased();

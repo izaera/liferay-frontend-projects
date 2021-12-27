@@ -2,9 +2,9 @@ import {FilePath, format} from '@liferay/js-toolkit-core';
 import fs from 'fs';
 import webpack from 'webpack';
 
-import ExplainedWebpackError from './ExplainedWebpackError';
+import {abortWebpack} from './abort';
 
-const {debug, fail, print} = format;
+const {debug, print} = format;
 
 export default async function generateCjsEsmBridge(
 	bareIdentifier: string,
@@ -34,17 +34,6 @@ export default await new Promise((resolve, reject) => {
 	);
 
 	fs.unlinkSync(webpackFile.asNative);
-}
-
-function abortWithErrors(stats: webpack.Stats): void {
-	const {errors} = stats.compilation;
-
-	errors.forEach((error) => {
-		print(fail`${new ExplainedWebpackError(error).toString()}\n`);
-	});
-
-	print(fail`Build failed: webpack build finished with errors`);
-	process.exit(1);
 }
 
 async function runWebpack(
@@ -82,7 +71,7 @@ async function runWebpack(
 	});
 
 	if (stats.hasErrors()) {
-		abortWithErrors(stats);
+		abortWebpack(stats);
 	}
 
 	print(debug`Generated CJS-ESM bridge for {${bareIdentifier}}`);
