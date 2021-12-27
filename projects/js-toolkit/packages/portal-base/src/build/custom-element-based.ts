@@ -8,6 +8,7 @@ import {FilePath, format} from '@liferay/js-toolkit-core';
 import fs from 'fs';
 import project from 'liferay-npm-build-tools-common/lib/project';
 
+import processImportmapJson from '../util/processImportmapJson';
 import runBabel from '../util/runBabel';
 import runSass from '../util/runSass';
 
@@ -33,6 +34,8 @@ of support related to this type of build.
 		text`Have fun, in any case |🙌|`,
 		''
 	);
+
+	await processImportmapJson(prjDir, buildDir);
 
 	runSass(srcDir, buildDir, {
 		sourceMaps: false,

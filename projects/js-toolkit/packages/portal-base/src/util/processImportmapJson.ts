@@ -5,6 +5,7 @@
 
 import {FilePath, format} from '@liferay/js-toolkit-core';
 import fs from 'fs';
+import resolve from 'resolve';
 
 import generateCjsEjsBridge from './generateCjsEsmBridge';
 
@@ -42,23 +43,26 @@ export default async function processImportmapJson(
 	let outImportMap: ImportmapJson = {};
 
 	for await (const [bareIdentifier, uri] of Object.entries(importmap)) {
+		let processedUri: string = uri;
+
 		if (uri.startsWith('cjs')) {
-			const cjsFile = prjDir.join(uri.replace(/^cjs:/, ''));
-			const esmFile = buildDir.join(
-				'__liferay__',
-				'cjs2esm',
-				`${bareIdentifier}.js`
+			processedUri = await processCjs(
+				prjDir,
+				buildDir,
+				bareIdentifier,
+				uri.substring(4)
 			);
-
-			await generateCjsEjsBridge(bareIdentifier, cjsFile, esmFile);
-
-			outImportMap[bareIdentifier] = `./${
-				buildDir.relative(esmFile).asPosix
-			}`;
 		}
-		else {
-			outImportMap[bareIdentifier] = uri;
+		else if (uri.startsWith('webpack')) {
+			processedUri = await processWebpack(
+				prjDir,
+				buildDir,
+				bareIdentifier,
+				uri.substring(8)
+			);
 		}
+
+		outImportMap[bareIdentifier] = processedUri;
 	}
 
 	fs.writeFileSync(
@@ -66,4 +70,42 @@ export default async function processImportmapJson(
 		JSON.stringify(outImportMap, null, 2),
 		'utf8'
 	);
+}
+
+async function processCjs(
+	prjDir: FilePath,
+	buildDir: FilePath,
+	bareIdentifier: string,
+	uriPath: string
+): Promise<string> {
+	const cjsFile = prjDir.join(uriPath);
+	const esmFile = buildDir.join(
+		'__liferay__',
+		'cjs2esm',
+		`${bareIdentifier}.js`
+	);
+
+	await generateCjsEjsBridge(bareIdentifier, cjsFile, esmFile);
+
+	return `./${buildDir.relative(esmFile).asPosix}`;
+}
+
+async function processWebpack(
+	prjDir: FilePath,
+	buildDir: FilePath,
+	bareIdentifier: string,
+	uriPath: string
+): Promise<string> {
+	const cjsFile = new FilePath(
+		resolve.sync(uriPath, {basedir: prjDir.asNative})
+	);
+	const esmFile = buildDir.join(
+		'__liferay__',
+		'cjs2esm',
+		`${bareIdentifier}.js`
+	);
+
+	await generateCjsEjsBridge(bareIdentifier, cjsFile, esmFile);
+
+	return `./${buildDir.relative(esmFile).asPosix}`;
 }
