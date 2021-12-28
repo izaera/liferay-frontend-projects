@@ -6,6 +6,7 @@
 import {format} from '@liferay/js-toolkit-core';
 import path from 'path';
 
+import analyze from './analyze';
 import build from './build';
 import clean from './clean';
 import deploy from './deploy';
@@ -13,6 +14,7 @@ import deploy from './deploy';
 const {fail, print, title} = format;
 
 export interface Tasks {
+	analyze?: {(): Promise<void>};
 	build?: {(): Promise<void>};
 	clean?: {(): Promise<void>};
 	deploy?: {(): Promise<void>};
@@ -31,9 +33,20 @@ export default async function run(
 
 	/* eslint-disable-next-line */
 	const pkgJson = require(path.join(platformPath, 'package.json'));
-	const tasks: Tasks = {build, clean, deploy, ...(taskOverrides || {})};
+	const tasks: Tasks = {
+		analyze,
+		build,
+		clean,
+		deploy,
+		...(taskOverrides || {}),
+	};
 
 	switch (cmd) {
+		case 'analyze':
+			print(title`Analyzing project structure and dependencies`);
+			await tasks.analyze();
+			break;
+
 		case 'build':
 			print(
 				title`Building project for target platform: {${pkgJson.name}}`

@@ -8,34 +8,18 @@ import fs from 'fs';
 import resolve from 'resolve';
 
 import generateCjsEjsBridge from './generateCjsEsmBridge';
+import readImportmapJson, {ImportmapJson} from './readImportmapJson';
 
 const {info, print} = format;
-
-export interface ImportmapJson {
-	[bareIdentifier: string]: string;
-}
 
 export default async function processImportmapJson(
 	prjDir: FilePath,
 	buildDir: FilePath,
 	defaultImportmapJson: ImportmapJson = {}
 ): Promise<void> {
-	let json: string;
-
-	try {
-		json = fs.readFileSync(prjDir.join('importmap.json').asNative, 'utf8');
-	}
-	catch (error) {
-		if (error.code !== 'ENOENT') {
-			throw error;
-		}
-
-		json = '{}';
-	}
-
 	const importmap: ImportmapJson = {
 		...defaultImportmapJson,
-		...JSON.parse(json),
+		...readImportmapJson(prjDir),
 	};
 
 	print(info`Processing import map...`);
