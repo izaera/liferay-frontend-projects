@@ -8,13 +8,10 @@ import project from 'liferay-npm-build-tools-common/lib/project';
 import os from 'os';
 import path from 'path';
 
-export type Command = 'build' | 'deploy';
+export type Command = 'deploy';
 export type ConfigurationValue = boolean | number | object | string;
 
 export interface Configuration {
-	build?: {
-		type?: 'ufesm';
-	};
 	deploy?: {
 		liferayDir?: string;
 	};
@@ -33,8 +30,8 @@ function load(): Configuration {
 	let configuration: Configuration = {};
 
 	[
-		path.join(os.homedir(), '.liferay.json'),
 		project.dir.join(CONFIGURATION_FILE).asNative,
+		path.join(os.homedir(), '.liferay.json'),
 	].forEach((liferayJsonPath) => {
 		try {
 			configuration = {

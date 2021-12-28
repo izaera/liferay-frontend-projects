@@ -12,11 +12,10 @@ import project from 'liferay-npm-build-tools-common/lib/project';
 import path from 'path';
 import sass from 'sass';
 
-import abort from '../util/abort';
-import findFiles from '../util/findFiles';
-import runBabel from '../util/runBabel';
-import sassImporter from '../util/sassImporter';
-import spawn from '../util/spawn';
+import abort from './util/abort';
+import findFiles from './util/findFiles';
+import sassImporter from './util/sassImporter';
+import spawn from './util/spawn';
 
 const {info, print, success} = format;
 
@@ -59,6 +58,44 @@ function copyAssets(): void {
 	});
 }
 
+function runBabel(): void {
+	const jsFiles = findFiles(srcDir, (dirent) =>
+		dirent.name.toLowerCase().endsWith('.js')
+	);
+
+	print(info`Running {babel} on ${jsFiles.length} files...`);
+
+	jsFiles.forEach((jsFile) => {
+		const srcDirRelJsFile = srcDir.relative(jsFile);
+
+		try {
+			const {code, map} = babel.transformSync(
+				fs.readFileSync(jsFile.asNative, 'utf8'),
+				{
+					filename: jsFile.asNative,
+					presets: [babelPresetEnv, babelPresetReact],
+					sourceMaps: true,
+				}
+			);
+
+			fs.writeFileSync(
+				buildDir.join(srcDirRelJsFile).asNative,
+				code,
+				'utf8'
+			);
+
+			fs.writeFileSync(
+				buildDir.join(`${srcDirRelJsFile}.map`).asNative,
+				JSON.stringify(map),
+				'utf8'
+			);
+		}
+		catch (babelError) {
+			abort(babelError);
+		}
+	});
+}
+
 function runCompiler(): void {
 	const dependencies = project.pkgJson['dependencies'] || {};
 	const devDependencies = project.pkgJson['devDependencies'] || {};
@@ -67,10 +104,7 @@ function runCompiler(): void {
 		runTsc();
 	}
 	else {
-		runBabel(srcDir, buildDir, {
-			presets: [babelPresetEnv, babelPresetReact],
-			sourceMaps: true,
-		});
+		runBabel();
 	}
 }
 

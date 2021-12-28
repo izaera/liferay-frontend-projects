@@ -4,10 +4,7 @@
  */
 
 import * as acorn from 'acorn';
-import acornJsx from 'acorn-jsx';
 import estree from 'estree';
-
-const JSXParser = acorn.Parser.extend(acornJsx());
 
 /**
  * Parses JavaScript source code and converts it to a Program AST node.
@@ -15,7 +12,7 @@ const JSXParser = acorn.Parser.extend(acornJsx());
  * @param code
  */
 export function parse(code: string): estree.Program {
-	const program = JSXParser.parse(code, {
+	const program = acorn.parse(code, {
 		allowAwaitOutsideFunction: true,
 		allowHashBang: true,
 		allowImportExportEverywhere: true,
