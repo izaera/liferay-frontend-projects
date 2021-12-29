@@ -3,11 +3,56 @@
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
-import {FilePath} from '@liferay/js-toolkit-core';
+import {FilePath, format} from '@liferay/js-toolkit-core';
 import fs from 'fs';
 import {sync as resolve} from 'resolve';
+import sass from 'sass';
 
-export default function (url: string): {file: string} {
+import Project from './Project';
+import findFiles from './findFiles';
+import abort from './abort';
+
+const {info, print} = format;
+
+export default function runSass(project: Project): void {
+	const {buildDir, srcDir} = project;
+
+	const scssFiles = findFiles(srcDir, (dirent) => {
+		const lowerCaseName = dirent.name.toLowerCase();
+
+		return (
+			lowerCaseName.endsWith('.scss') && !lowerCaseName.startsWith('_')
+		);
+	});
+	print(info`Running {sass} on ${scssFiles.length} files...`);
+
+	scssFiles.forEach((scssFile) => {
+		const srcDirRelScssFile = srcDir.relative(scssFile);
+		const outFile = buildDir.join(
+			srcDirRelScssFile.asNative.replace(/\.scss$/, '.css')
+		);
+
+		try {
+			const {css, map} = sass.renderSync({
+				file: scssFile.asNative,
+				importer: sassImporter,
+				outFile: outFile.asNative,
+				sourceMap: true,
+			});
+
+			fs.mkdirSync(outFile.dirname().asNative, {recursive: true});
+
+			fs.writeFileSync(outFile.asNative, css, 'utf8');
+
+			fs.writeFileSync(`${outFile.asNative}.map`, map, 'utf8');
+		}
+		catch (error) {
+			abort(error);
+		}
+	});
+}
+
+function sassImporter(url: string): {file: string} {
 	const importDir = new FilePath(this.options.file).dirname();
 
 	let targetFile = tryImport(url, (file) => {

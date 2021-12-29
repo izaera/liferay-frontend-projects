@@ -2,10 +2,12 @@
 	"author": "Liferay Frontend Infrastructure Team <pt-frontend-infrastructure@liferay.com>",
 	"dependencies": {
 		"@babel/core": "^7.14.3",
-		"@babel/preset-env": "^7.14.2",
+		"@babel/preset-env": "^7.16.5",
 		"@babel/preset-react": "^7.13.13",
 		"@liferay/js-toolkit-core": "^4.0.1",
+		"babel-loader": "^8.2.3",
 		"babel-preset-liferay-standard": "^2.27.0",
+		"css-loader": "^6.5.1",
 		"liferay-npm-build-tools-common": "^2.27.0",
 		"liferay-npm-bundler": "^2.27.0",
 		"liferay-npm-bundler-loader-babel-loader": "^2.27.0",
@@ -21,7 +23,8 @@
 		"liferay-npm-bundler-plugin-replace-browser-modules": "^2.27.0",
 		"liferay-npm-bundler-plugin-resolve-linked-dependencies": "^2.27.0",
 		"resolve": "^1.20.0",
-		"sass": "^1.35.1"
+		"sass": "^1.35.1",
+		"style-loader": "^3.3.1"
 	},
 	"description": "Target Platform Base Code",
 	"license": "LGPL-3.0",

@@ -5,66 +5,71 @@
 
 import {FilePath, format} from '@liferay/js-toolkit-core';
 import fs from 'fs';
-import project from 'liferay-npm-build-tools-common/lib/project';
-import path from 'path';
 import {createInterface} from 'readline';
 
-import * as configuration from './util/configuration';
+import Project from './util/Project';
 
 const {fail, print, question, success} = format;
 
-const outputDir = new FilePath(project.jar.outputDir.asNative);
-const outputFilename = project.jar.outputFilename;
-const outputFile = outputDir.join(outputFilename);
-
 export default async function deploy(): Promise<void> {
-	if (!fs.existsSync(outputFile.asNative)) {
-		print(
-			fail`Bundle {${outputFile}} does not exist; please build it before deploying`
-		);
-		process.exit(1);
+	const project = new Project('.');
+
+	let {deployDir} = project;
+
+	if (!deployDir) {
+		deployDir = await promptForDeployPath(project);
 	}
 
-	let deployPath = configuration.get('deploy', 'path') as string;
-
-	if (!deployPath) {
-		deployPath = await promptForDeployPath();
-	}
-
-	if (!deployPath) {
+	if (!deployDir) {
 		print(fail`No path to Liferay installation given: cannot deploy`);
 		process.exit(1);
 	}
 
-	fs.copyFileSync(outputFile.asNative, path.join(deployPath, outputFilename));
+	const {distFile} = project;
 
-	print(success`Bundle {${outputFile}} deployed to {${deployPath}}`);
+	if (!fs.existsSync(distFile.asNative)) {
+		print(
+			fail`Bundle {${distFile}} does not exist; please build it before deploying`
+		);
+		process.exit(1);
+	}
+
+	fs.copyFileSync(
+		distFile.asNative,
+		deployDir.join(distFile.basename().asNative).asNative
+	);
+
+	print(
+		success`Bundle {${distFile.basename().asNative}} deployed to {${
+			deployDir.asNative
+		}}`
+	);
 }
 
-async function promptForDeployPath(): Promise<string> {
+async function promptForDeployPath(project: Project): Promise<FilePath> {
 	const lines = createInterface({
 		input: process.stdin,
 	});
 
 	print(question`Please enter your local Liferay installation directory`);
 
-	let deployPath: string;
+	let deployDir: FilePath;
 
 	for await (const line of lines) {
-		deployPath = path.join(line, 'osgi', 'modules');
+		deployDir = new FilePath(line).join('osgi', 'modules').resolve();
 
-		if (fs.existsSync(deployPath)) {
-			configuration.set('deploy', 'path', deployPath);
+		if (fs.existsSync(deployDir.asNative)) {
+			project.storeDeployDir(deployDir);
 
 			break;
 		}
 		else {
-			print(fail`${deployPath} does not exist`);
+			print(fail`${deployDir.asNative} does not exist`);
 			print(
 				question`Please enter your local Liferay installation directory`
 			);
 		}
 	}
 
-	return deployPath;
+	return deployDir;
 }

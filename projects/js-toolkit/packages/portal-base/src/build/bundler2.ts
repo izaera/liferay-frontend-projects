@@ -6,34 +6,30 @@
 import * as babel from '@babel/core';
 import babelPresetEnv from '@babel/preset-env';
 import babelPresetReact from '@babel/preset-react';
-import {FilePath, format} from '@liferay/js-toolkit-core';
+import {format} from '@liferay/js-toolkit-core';
 import fs from 'fs';
-import project from 'liferay-npm-build-tools-common/lib/project';
 import path from 'path';
-import sass from 'sass';
 
-import abort from './util/abort';
-import findFiles from './util/findFiles';
-import sassImporter from './util/sassImporter';
-import spawn from './util/spawn';
+import Project from '../util/Project';
+import abort from '../util/abort';
+import findFiles from '../util/findFiles';
+import runSass from '../util/runSass';
+import spawn from '../util/spawn';
 
-const {info, print, success} = format;
+const {info, print} = format;
 
-const srcDir = new FilePath(project.dir.join('src').asNative);
-const buildDir = new FilePath(project.buildDir.asNative);
+export default async function bundler2(project: Project): Promise<void> {
+	fs.mkdirSync(project.buildDir.asNative, {recursive: true});
 
-export default async function build(): Promise<void> {
-	fs.mkdirSync(buildDir.asNative, {recursive: true});
-
-	copyAssets();
-	runSass();
-	runCompiler();
+	copyAssets(project);
+	runSass(project);
+	runCompiler(project);
 	runBundler();
-
-	print(success`{Project successfully built}`);
 }
 
-function copyAssets(): void {
+function copyAssets(project: Project): void {
+	const {buildDir, srcDir} = project;
+
 	const assetFiles = findFiles(srcDir, (dirent) => {
 		const lowerCaseName = dirent.name.toLowerCase();
 
@@ -58,7 +54,9 @@ function copyAssets(): void {
 	});
 }
 
-function runBabel(): void {
+function runBabel(project: Project): void {
+	const {buildDir, srcDir} = project;
+
 	const jsFiles = findFiles(srcDir, (dirent) =>
 		dirent.name.toLowerCase().endsWith('.js')
 	);
@@ -96,7 +94,7 @@ function runBabel(): void {
 	});
 }
 
-function runCompiler(): void {
+function runCompiler(project: Project): void {
 	const dependencies = project.pkgJson['dependencies'] || {};
 	const devDependencies = project.pkgJson['devDependencies'] || {};
 
@@ -104,7 +102,7 @@ function runCompiler(): void {
 		runTsc();
 	}
 	else {
-		runBabel();
+		runBabel(project);
 	}
 }
 
@@ -124,42 +122,6 @@ function runBundler(): void {
 	print(info`Running {liferay-npm-bundler}...`);
 
 	spawn('node', [bundlerPath]);
-}
-
-function runSass(): void {
-	const scssFiles = findFiles(srcDir, (dirent) => {
-		const lowerCaseName = dirent.name.toLowerCase();
-
-		return (
-			lowerCaseName.endsWith('.scss') && !lowerCaseName.startsWith('_')
-		);
-	});
-	print(info`Running {sass} on ${scssFiles.length} files...`);
-
-	scssFiles.forEach((scssFile) => {
-		const srcDirRelScssFile = srcDir.relative(scssFile);
-		const outFile = buildDir.join(
-			srcDirRelScssFile.asNative.replace(/\.scss$/, '.css')
-		);
-
-		try {
-			const {css, map} = sass.renderSync({
-				file: scssFile.asNative,
-				importer: sassImporter,
-				outFile: outFile.asNative,
-				sourceMap: true,
-			});
-
-			fs.mkdirSync(outFile.dirname().asNative, {recursive: true});
-
-			fs.writeFileSync(outFile.asNative, css, 'utf8');
-
-			fs.writeFileSync(`${outFile.asNative}.map`, map, 'utf8');
-		}
-		catch (error) {
-			abort(error);
-		}
-	});
 }
 
 function runTsc(): void {
