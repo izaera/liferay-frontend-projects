@@ -9,7 +9,7 @@ import fs from 'fs';
 import abort from '../util/abort';
 import Project from '../util/Project';
 import runSass from '../util/runSass';
-import runWebpack from '../util/runWebpack';
+import runWebpack from '../webpack/runWebpack';
 
 const {print, text, warn} = format;
 

@@ -24,7 +24,10 @@
 		"liferay-npm-bundler-plugin-resolve-linked-dependencies": "^2.27.0",
 		"resolve": "^1.20.0",
 		"sass": "^1.35.1",
-		"style-loader": "^3.3.1"
+		"style-loader": "^3.3.1",
+		"webpack": "^5.65.0",
+		"webpack-cli": "^4.9.1",
+		"webpack-dev-server": "^4.7.2"
 	},
 	"description": "Target Platform Base Code",
 	"license": "LGPL-3.0",
@@ -48,5 +51,8 @@
 		"preversion": "liferay-workspace-scripts ci",
 		"test": "liferay-workspace-scripts test"
 	},
-	"version": "1.0.0"
+	"version": "1.0.0",
+	"devDependencies": {
+		"@types/node": "^16.11.1"
+	}
 }

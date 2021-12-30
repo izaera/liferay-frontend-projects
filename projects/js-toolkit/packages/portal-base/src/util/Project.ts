@@ -104,6 +104,19 @@ export default class Project {
 		return this._buildOptions;
 	}
 
+	get entryPointFile(): FilePath {
+		if (!this._entryPointFile) {
+			this._entryPointFile = new FilePath(
+				this.pkgJson.main || './index.js',
+				{
+					posix: true,
+				}
+			).toDotRelative();
+		}
+
+		return this._entryPointFile;
+	}
+
 	get pkgJson(): PkgJson {
 		if (!this._pkgJson) {
 			this._pkgJson = require(this.dir.join('package.json').asNative);
@@ -201,5 +214,6 @@ export default class Project {
 	private _buildType: BuildType;
 	private _configuration: Configuration;
 	private _deployDir: FilePath | null;
+	private _entryPointFile: FilePath;
 	private _pkgJson: PkgJson;
 }
