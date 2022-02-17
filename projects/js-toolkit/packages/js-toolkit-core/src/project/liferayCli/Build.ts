@@ -7,15 +7,23 @@ import fs from 'fs';
 
 import FilePath from '../../file/FilePath';
 import LiferayJson, {
+	AngularCliBuildConfig,
 	BuildConfig,
 	Bundler2BuildConfig,
 	CustomElementBuildConfig,
 } from '../../schema/LiferayJson';
 import Project from './Project';
 
-type BuildType = 'bundler2' | 'customElement';
+type BuildType = '@angular/cli' | 'bundler2' | 'customElement';
 
-type BuildOptions = Bundler2BuildOptions | CustomElementBuildOptions;
+type BuildOptions =
+	| AngularCliBuildOptions
+	| Bundler2BuildOptions
+	| CustomElementBuildOptions;
+
+export type AngularCliBuildOptions = {
+	htmlElementName: string | null;
+};
 
 export type Bundler2BuildOptions = {};
 
@@ -32,7 +40,23 @@ export default class Build {
 	constructor(project: Project, liferayJson: LiferayJson) {
 		const config: BuildConfig = liferayJson.build?.options || {};
 
+		liferayJson.build = liferayJson.build || {};
+		liferayJson.build.type =
+			liferayJson.build.type || guessBuildType(project);
+
 		switch (liferayJson.build.type) {
+			case '@angular/cli':
+				this.type = '@angular/cli';
+
+				// TODO: get output path from angular.json
+
+				this.dir = project.dir.join('dist');
+				this.options = this._toAngularCliBuildOptions(
+					project,
+					config as AngularCliBuildConfig
+				);
+				break;
+
 			case 'customElement':
 				this.type = 'customElement';
 				this.dir = project.dir.join('build');
@@ -63,6 +87,25 @@ export default class Build {
 					`Unknown project build type type: ${liferayJson.build.type}`
 				);
 		}
+	}
+
+	private _toAngularCliBuildOptions(
+		project: Project,
+		config: AngularCliBuildConfig
+	): AngularCliBuildOptions {
+		const options: AngularCliBuildOptions = {
+			htmlElementName: config.htmlElementName,
+		};
+
+		// Infer htmlElementName from source code if needed
+
+		if (!options.htmlElementName) {
+			options.htmlElementName = findHtmlElementName(
+				project.mainModuleFile
+			);
+		}
+
+		return options;
 	}
 
 	private _toCustomElementBuildOptions(
@@ -144,4 +187,17 @@ function findHtmlElementName(file: FilePath): string | undefined {
 	}
 
 	return args.substring(1, i);
+}
+
+function guessBuildType(project: Project): BuildType {
+	const {pkgJson} = project;
+
+	if (
+		pkgJson.devDependencies &&
+		pkgJson.devDependencies['@angular-devkit/build-angular']
+	) {
+		return '@angular/cli';
+	}
+
+	return 'bundler2';
 }

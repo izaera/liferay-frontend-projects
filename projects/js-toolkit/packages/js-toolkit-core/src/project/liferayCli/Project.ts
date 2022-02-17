@@ -26,7 +26,7 @@ export default class Project {
 	readonly deploy: Deploy;
 	readonly dir: FilePath;
 	readonly dist: Dist;
-	readonly mainModuleFile: FilePath;
+	readonly mainModuleFile: FilePath | null;
 	readonly pkgJson: PkgJson;
 	readonly srcDir: FilePath;
 	readonly start: Start;
@@ -50,14 +50,14 @@ export default class Project {
 			);
 		}
 		else {
-			this.mainModuleFile = this.srcDir.join('index.js');
+			this.mainModuleFile = guessMainModuleFile(this.srcDir);
 		}
 
 		const liferayJson = this._loadLiferayJson();
 
 		this.build = new Build(this, liferayJson);
 		this.deploy = new Deploy(this, liferayJson);
-		this.dist = new Dist(this, liferayJson);
+		this.dist = new Dist(this, liferayJson, this.build);
 		this.start = new Start(this, liferayJson);
 	}
 
@@ -155,9 +155,6 @@ export default class Project {
 	}
 
 	private _normalizeLiferayJson(liferayJson: LiferayJson): LiferayJson {
-		liferayJson.build = liferayJson.build || {};
-		liferayJson.build.type = liferayJson.build.type || 'bundler2';
-
 		const options = liferayJson.build?.options;
 
 		if (options && options['externals']) {
@@ -177,4 +174,17 @@ export default class Project {
 
 		return liferayJson;
 	}
+}
+
+function guessMainModuleFile(srcDir: FilePath): FilePath {
+
+	// TODO: guess main file looking at angular.json if it exists
+
+	for (const file of ['index.js', 'index.ts', 'main.ts']) {
+		if (fs.existsSync(srcDir.join(file).asNative)) {
+			return srcDir.join(file);
+		}
+	}
+
+	return null;
 }

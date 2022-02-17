@@ -5,14 +5,16 @@
 
 import FilePath from '../../file/FilePath';
 import LiferayJson from '../../schema/LiferayJson';
+import Build from './Build';
 import Project from './Project';
 
 export default class Dist {
 	readonly dir: FilePath | null;
 	readonly file: FilePath | null;
 
-	constructor(_project: Project, liferayJson: LiferayJson) {
-		switch (liferayJson.build.type) {
+	constructor(_project: Project, liferayJson: LiferayJson, build: Build) {
+		switch (build.type) {
+			case '@angular/cli':
 			case 'customElement':
 				this.dir = null;
 				this.file = null;

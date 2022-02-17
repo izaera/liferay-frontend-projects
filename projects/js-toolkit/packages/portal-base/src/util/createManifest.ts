@@ -12,6 +12,8 @@ import {
 import abort from '../util/abort';
 import findScssFiles from './findScssFiles';
 
+// TODO: move this out of util into consumer file as it is not generic
+
 export default function createManifest(project: Project): string {
 	const options = project.build.options as CustomElementBuildOptions;
 	const {htmlElementName} = options;

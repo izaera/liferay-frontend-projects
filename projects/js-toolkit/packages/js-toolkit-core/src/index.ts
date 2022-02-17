@@ -32,6 +32,7 @@ export {default as B3VersionInfo} from './project/bundler3/VersionInfo';
 
 export {default as Project} from './project/liferayCli/Project';
 export {
+	AngularCliBuildOptions,
 	Bundler2BuildOptions,
 	CustomElementBuildOptions,
 } from './project/liferayCli/Build';

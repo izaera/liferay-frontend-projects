@@ -7,8 +7,11 @@ import {format} from '@liferay/js-toolkit-core';
 
 const {fail, print} = format;
 
-export default function abort(error: Error | string): void {
-	if (error['stack']) {
+export default function abort(error?: Error | string): void {
+	if (error === undefined) {
+		print('');
+	}
+	else if (error['stack']) {
 		print('', error['stack'], '');
 	}
 	else {

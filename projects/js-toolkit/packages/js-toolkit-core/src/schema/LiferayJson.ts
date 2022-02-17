@@ -6,7 +6,7 @@
 export default interface LiferayJson {
 	build?: {
 		options?: BuildConfig;
-		type?: 'bundler2' | 'customElement';
+		type?: '@angular/cli' | 'bundler2' | 'customElement';
 	};
 	deploy?: {
 		path?: string;
@@ -16,7 +16,14 @@ export default interface LiferayJson {
 	};
 }
 
-export type BuildConfig = Bundler2BuildConfig | CustomElementBuildConfig;
+export type BuildConfig =
+	| AngularCliBuildConfig
+	| Bundler2BuildConfig
+	| CustomElementBuildConfig;
+
+export type AngularCliBuildConfig = {
+	htmlElementName?: string;
+};
 
 export type Bundler2BuildConfig = {};
 

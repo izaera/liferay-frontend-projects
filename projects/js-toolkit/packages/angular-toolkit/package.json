@@ -1,0 +1,36 @@
+{
+	"author": "Liferay Frontend Infrastructure Team <pt-frontend-infrastructure@liferay.com>",
+	"builders": "./lib/builders/builders.json",
+	"dependencies": {
+		"@angular-devkit/architect": "^0.1302.3",
+		"@angular-devkit/core": "^13.2.3"
+	},
+	"description": "Angular CLI Toolkit for Liferay Projects.",
+	"license": "LGPL-3.0",
+	"name": "@liferay/angular-toolkit",
+	"peerDependecies": {
+		"@angular-devkit/build-angular": "^13.1.4"
+	},
+	"repository": {
+		"directory": "projects/js-toolkit/packages/angular-toolkit",
+		"type": "git",
+		"url": "https://github.com/liferay/liferay-frontend-projects.git"
+	},
+	"scripts": {
+		"build": "node ../../scripts/build.js",
+		"ci": "liferay-workspace-scripts ci",
+		"clean": "node ../../scripts/clean.js",
+		"format": "liferay-workspace-scripts format",
+		"format:check": "liferay-workspace-scripts format:check",
+		"lint": "liferay-workspace-scripts lint",
+		"lint:fix": "liferay-workspace-scripts lint:fix",
+		"postversion": "liferay-workspace-scripts publish",
+		"prepublishOnly": "yarn build",
+		"preversion": "liferay-workspace-scripts ci",
+		"test": "liferay-workspace-scripts test"
+	},
+	"version": "1.0.0",
+	"devDependencies": {
+		"@angular-devkit/build-angular": "^13.2.3"
+	}
+}

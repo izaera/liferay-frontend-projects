@@ -1,0 +1,9 @@
+{
+  "builders": {
+    "manifest": {
+      "implementation": "./manifest/index.js",
+      "schema": "./manifest/schema.json",
+      "description": "Generates the Bundled App manifest.json file."
+    }
+  }
+}

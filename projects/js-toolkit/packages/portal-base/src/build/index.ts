@@ -6,6 +6,7 @@
 import {Project, format} from '@liferay/js-toolkit-core';
 
 import abort from '../util/abort';
+import angularCli from './angularCli';
 import bundler2 from './bundler2';
 import customElement from './customElement';
 
@@ -16,6 +17,10 @@ export default async function build(): Promise<void> {
 
 	try {
 		switch (project.build.type) {
+			case '@angular/cli':
+				await angularCli(project);
+				break;
+
 			case 'customElement':
 				await customElement(project);
 				break;
