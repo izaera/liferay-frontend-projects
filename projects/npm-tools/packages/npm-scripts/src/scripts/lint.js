@@ -33,7 +33,7 @@ const DEFAULT_OPTIONS = {
  */
 const EXTENSIONS = {
 	css: ['.css'],
-	js: ['.js', '.ts', '.tsx'],
+	js: ['.js', '.mjs', '.ts', '.tsx'],
 	jsp: ['.jsp', '.jspf'],
 	scss: ['.scss'],
 };

@@ -29,6 +29,7 @@ const EXTENSIONS = [
 	'.jspf',
 	'.md',
 	'.markdown',
+	'.mjs',
 	'.scss',
 	'.ts',
 	'.tsx',

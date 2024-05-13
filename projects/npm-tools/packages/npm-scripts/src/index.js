@@ -50,7 +50,7 @@ module.exports = async function () {
 	};
 
 	const PRIVATE_COMMANDS = {
-		async 'format'() {
+		'format': async function format() {
 			await require('./scripts/format')();
 		},
 
@@ -58,7 +58,7 @@ module.exports = async function () {
 			await require('./scripts/format')({check: true});
 		},
 
-		async 'lint'() {
+		'lint': async function lint() {
 			await require('./scripts/lint')();
 		},
 
