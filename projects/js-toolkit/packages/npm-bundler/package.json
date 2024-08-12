@@ -12,7 +12,7 @@
 		"estraverse": "^4.3.0",
 		"fs-extra": "^8.1.0",
 		"globby": "^11.0.1",
-		"jszip": "^3.1.5",
+		"jszip": "^3.10.1",
 		"pretty-time": "^1.1.0",
 		"read-json-sync": "^2.0.1",
 		"source-map": "^0.7.3",

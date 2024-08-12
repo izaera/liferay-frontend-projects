@@ -11,7 +11,7 @@
 		"css-loader": "^6.6.0",
 		"globby": "^10.0.1",
 		"inquirer": "^7.3.1",
-		"jszip": "^3.1.5",
+		"jszip": "^3.10.1",
 		"liferay-npm-build-tools-common": "^2.27.0",
 		"liferay-npm-bundler": "^2.27.0",
 		"liferay-npm-bundler-loader-babel-loader": "^2.27.0",
